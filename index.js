@@ -111,4 +111,24 @@ const viewRoles = () => {
                 mainMenu();
         });    
     });
-};   
+};
+
+const viewEmployees = () => {
+    return new Promise((res, reject)=>{
+    console.log("Viewing all employees\n");
+
+    const sqlQuery = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS Department, role.salary, employee.
+                        CONCAT (manager.first_name, " ", manager.last_name) AS Manager
+                        FROM employee
+                        LEFT JOIN role ON employee.role_id = role.id
+                        LEFT JOIN department ON role.department_id = department.id 
+                        LEFT JOIN employee manager ON employee.manager_id = manager.id`;
+                        connection.query(sqlQuery, (err,rows)=>{
+                            if(err){
+                                return reject(err);
+                            } 
+                            console.table(rows);
+                            mainMenu();
+                    });    
+                });
+            };
