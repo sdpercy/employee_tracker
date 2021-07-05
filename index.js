@@ -81,19 +81,34 @@ const mainMenu = () => {
   };
 
 const viewDepartments = () => {
+        return new Promise((res, reject) => {
+            console.log("Viewing all department\n");
 
-    return new Promise((res, reject) => {
-        console.log("Viewing all department\n");
+        const sqlQuery = `SELECT department.id AS ID, department.name AS Department FROM department`;
 
-    const sqlQuery = `SELECT department.id AS ID, department.name AS Department FROM department`;
-
-        connection.query(sqlQuery, (err,rows)=>{
-            if(err){
-                return reject(err);
-            } 
-            console.table(rows);
-            mainMenu();
+            connection.query(sqlQuery, (err,rows)=>{
+                if(err){
+                    return reject(err);
+                } 
+                console.table(rows);
+                mainMenu();
+        });    
     });
-    
+};   
+
+const viewRoles = () => {
+    return new Promise((res, reject)=>{
+        console.log("Viewing all roles\n");
+
+    const sqlQuery = `SELECT role.id, role.title, department.name AS Department FROM role
+            INNER JOIN department ON role.department_id = department.id`;  
+
+            connection.query(sqlQuery, (err,rows)=>{
+                if(err){
+                    return reject(err);
+                } 
+                console.table(rows);
+                mainMenu();
+        });    
     });
 };   
