@@ -50,6 +50,7 @@ const mainMenu = () => {
             "Update an employee's role",
             "Update a Manager",
             "Delete Department",
+            "Delete Role",
             "Quit"]      
     }])
 .then (answer => {
@@ -81,6 +82,9 @@ const mainMenu = () => {
     }
     if (options === "Delete Department"){
         deleteDepartment();
+    }
+    if (options === "Delete Role"){
+        deleteRole();
     }
     if(options === "Quit"){
         connection.end();
@@ -481,4 +485,40 @@ const deleteDepartment = () => {
         });
       });
     });
-}; 
+};
+
+//-------------Delete Role --------------------
+const deleteRole = () => {
+    return new Promise((res, reject)=>{
+
+    const roleQuery = 'SELECT * FROM role';
+
+    connection.query(roleQuery, (err,data)=>{
+        if(err){
+            return reject(err);
+        }
+        const role = data.map(({ title, id }) => ({ name: title, value: id }));
+
+        inquirer.prompt([
+            {
+              type: 'list', 
+              name: 'role',
+              message: "What role would you like to delete?",
+              choices: role
+            }
+          ])
+          .then(roleChoice => {
+            const role = roleChoice.role;
+            const sqlQuery = `DELETE FROM role WHERE id = ?`;
+
+            connection.query(sqlQuery, role, (err,result)=>{
+                if(err){
+                    return reject(err);
+                }
+                console.log("Successfully deleted!");
+                viewRoles();
+            });
+        });
+      });
+    });
+};
