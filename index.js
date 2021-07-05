@@ -48,6 +48,7 @@ const mainMenu = () => {
             "Add a role",
             "Add an employee",
             "Update an employee's role",
+            "Update a Manager",
             "Quit"]      
     }])
 .then (answer => {
@@ -74,12 +75,15 @@ const mainMenu = () => {
     if(options === "Update an employee's role"){
       updateEmployee();
     }
+    if (options === "Update a Manager"){
+        updateManager();
+    }
     if(options === "Quit"){
-      quit();
+        connection.end();
       }
     });
   };
-
+//-------------View current departments----------------------
 const viewDepartments = () => {
         return new Promise((res, reject) => {
             console.log("Viewing all department\n");
@@ -95,7 +99,7 @@ const viewDepartments = () => {
         });    
     });
 };   
-
+//-------------View current roles----------------------
 const viewRoles = () => {
     return new Promise((res, reject)=>{
         console.log("Viewing all roles\n");
@@ -112,7 +116,7 @@ const viewRoles = () => {
         });    
     });
 };
-
+//-------------View current employee's----------------------
 const viewEmployees = () => {
     return new Promise((res, reject)=>{
     console.log("Viewing all employees\n");
@@ -133,7 +137,7 @@ const viewEmployees = () => {
         });    
     });
 };
-
+//-------------Add a department ----------------------   
 const addDepartment = () => {
     return new Promise((res, reject)=>{
         inquirer.prompt([
@@ -164,7 +168,7 @@ const addDepartment = () => {
         });
     });
 }
-
+//-------------Add a role----------------------
 const addRole = () => {
     return new Promise((res, reject)=>{
         inquirer.prompt([
@@ -226,7 +230,7 @@ const addRole = () => {
         });
     });
 };
-
+//-------------Add an employee ----------------------
 const addEmployee = () => {
     return new Promise((res, reject)=>{
         inquirer.prompt([
@@ -315,7 +319,7 @@ const addEmployee = () => {
         });
     });
 }
-
+//-------------Update an employee ----------------------
 const updateEmployee = () => {
     return new Promise((res, reject)=>{
         const employeeQuery = `SELECT * FROM employee`;
@@ -375,3 +379,66 @@ const updateEmployee = () => {
         });
     });
 };
+//-------------Update Manager ------------------
+
+const updateManager = () => {
+    return new Promise((res, reject)=>{
+        const employeeQuery = `SELECT * FROM employee`;
+
+        connection.query(employeeQuery, (err,data)=>{
+            if(err){
+                return reject(err);
+            }
+            const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+            inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'name',
+                  message: "Which employee would you like to update?",
+                  choices: employees
+                }
+              ])
+              .then(empChoice => {
+                const employee = empChoice.name;
+                const params = []; 
+                params.push(employee);
+
+                const managerQuery = `SELECT * FROM employee`;
+                connection.query(employeeQuery, (err,data)=>{
+                    if(err){
+                        return reject(err);
+                    }
+                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+                    inquirer.prompt([
+                        {
+                          type: 'list',
+                          name: 'manager',
+                          message: "Who is the employee's manager?",
+                          choices: managers
+                        }
+                      ])
+                          .then(managerChoice => {
+                            const manager = managerChoice.manager;
+                            params.push(manager); 
+                            
+                            let employee = params[0]
+                            params[0] = manager
+                            params[1] = employee
+
+                            const sqlQuery = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+
+                            connection.query(sqlQuery, params, (err,data)=>{
+                                if(err){
+                                    return reject(err);
+                                }
+                                console.log("Employee has been updated!");
+                                viewEmployees();
+                            });
+                        });
+                      });
+                    });
+                });
+            });
+        };
