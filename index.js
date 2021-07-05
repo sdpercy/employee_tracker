@@ -49,6 +49,7 @@ const mainMenu = () => {
             "Add an employee",
             "Update an employee's role",
             "Update a Manager",
+            "Delete Department",
             "Quit"]      
     }])
 .then (answer => {
@@ -77,6 +78,9 @@ const mainMenu = () => {
     }
     if (options === "Update a Manager"){
         updateManager();
+    }
+    if (options === "Delete Department"){
+        deleteDepartment();
     }
     if(options === "Quit"){
         connection.end();
@@ -442,3 +446,39 @@ const updateManager = () => {
                 });
             });
         };
+
+//------------- Delete Department ---------------------
+const deleteDepartment = () => {
+    return new Promise((res, reject)=>{
+
+    const deptQuery = 'SELECT * FROM department';
+
+    connection.query(deptQuery, (err,data)=>{
+        if(err){
+            return reject(err);
+        }
+        const dept = data.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer.prompt([
+            {
+              type: 'list', 
+              name: 'dept',
+              message: "What department would you like to delete?",
+              choices: dept
+            }
+          ])
+          .then(deptChoice => {
+            const dept = deptChoice.dept;
+            const sqlQuery = `DELETE FROM department WHERE id = ?`;
+
+            connection.query(sqlQuery, dept, (err,result)=>{
+                if(err){
+                    return reject(err);
+                }
+                console.log("Successfully deleted!");
+                viewDepartments();
+            });
+        });
+      });
+    });
+}; 
