@@ -51,6 +51,8 @@ const mainMenu = () => {
             "Update a Manager",
             "Delete Department",
             "Delete Role",
+            "Delete Employee",
+            "View Department Budget",
             "Quit"]      
     }])
 .then (answer => {
@@ -85,6 +87,12 @@ const mainMenu = () => {
     }
     if (options === "Delete Role"){
         deleteRole();
+    }
+    if (options === "Delete Employee"){
+        deleteEmployee();
+    }
+    if (options === "View Department Budget"){
+        viewBudget();
     }
     if(options === "Quit"){
         connection.end();
@@ -522,3 +530,58 @@ const deleteRole = () => {
       });
     });
 };
+
+//-------------Delete Employee --------------------
+const deleteEmployee = () => {
+    return new Promise((res, reject)=>{
+
+    const employeeQuery = 'SELECT * FROM employee';
+
+    connection.query(employeeQuery, (err,data)=>{
+        if(err){
+            return reject(err);
+        }
+        const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+        inquirer.prompt([
+            {
+              type: 'list', 
+              name: 'name',
+              message: "Which employee would you like to delete?",
+              choices: employees
+            }
+          ])
+          .then(employeeChoice => {
+            const employee = employeeChoice.name;
+            const sqlQuery = `DELETE FROM employee WHERE id = ?`;
+
+            connection.query(sqlQuery, employee, (err,result)=>{
+                if(err){
+                    return reject(err);
+                }
+                console.log("Successfully deleted!");
+                viewEmployees();
+            });
+        });
+      });
+    });
+};
+//-------------View Budget by department --------------------
+const viewBudget = () => {
+    return new Promise((res, reject)=>{
+        console.log('Showing budget by department...\n');
+        const sqlQuery = `SELECT department_id AS id, 
+                      department.name AS department,
+                      SUM(salary) AS budget
+               FROM  role  
+               JOIN department ON role.department_id = department.id GROUP BY  department_id`;
+        
+               connection.query(sqlQuery, (err,rows)=>{
+            if(err){
+                return reject(err);
+            }
+            console.table(rows);
+            mainMenu();
+        });
+    });
+};      
