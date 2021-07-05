@@ -63,7 +63,7 @@ const mainMenu = () => {
         viewEmployees();
     }
     if(options === "Add a department"){
-      addDepartmentInput();
+      addDepartment();
     }
     if(options === "Add a role"){
       addRoleInput();
@@ -123,12 +123,44 @@ const viewEmployees = () => {
                         LEFT JOIN role ON employee.role_id = role.id
                         LEFT JOIN department ON role.department_id = department.id 
                         LEFT JOIN employee manager ON employee.manager_id = manager.id`;
-                        connection.query(sqlQuery, (err,rows)=>{
-                            if(err){
-                                return reject(err);
-                            } 
-                            console.table(rows);
-                            mainMenu();
-                    });    
-                });
-            };
+
+            connection.query(sqlQuery, (err,rows)=>{
+                if(err){
+                    return reject(err);
+                } 
+                console.table(rows);
+                mainMenu();
+        });    
+    });
+};
+
+const addDepartment = () => {
+    return new Promise((res, reject)=>{
+        inquirer.prompt([
+            {
+              type: 'input', 
+              name: 'addDept',
+              message: "What department do you want to add?",
+              validate: addDept => {
+                if (addDept) {
+                    return true;
+                } else {
+                    console.log('Please enter a department');
+                    return false;
+                }
+              }
+            }
+          ])
+          .then(answer => {
+              sqlQuery = `INSERT INTO department (name) VALUES ("${answer.addDept}")`;
+
+              connection.query(sqlQuery, (err,rows)=>{
+                if(err){
+                    return reject(err);
+                }
+                console.log('Added ' + answer.addDept + " to departments!");
+                viewDepartments(); 
+            });
+        });
+    });
+}
