@@ -72,7 +72,7 @@ const mainMenu = () => {
       addEmployee();
     }
     if(options === "Update an employee's role"){
-      updateRoleInput();
+      updateEmployee();
     }
     if(options === "Quit"){
       quit();
@@ -306,7 +306,7 @@ const addEmployee = () => {
                                     return reject(err);
                                 }
                                 console.log("Employee added successfully!")
-                                viewEmployees()
+                                viewEmployees();
                             });
                         });
                     });
@@ -315,3 +315,63 @@ const addEmployee = () => {
         });
     });
 }
+
+const updateEmployee = () => {
+    return new Promise((res, reject)=>{
+        const employeeQuery = `SELECT * FROM employee`;
+
+        connection.query(employeeQuery, (err,data)=>{
+            if(err){
+                return reject(err);
+            }
+            const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+            inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'name',
+                  message: "Which employee would you like to update?",
+                  choices: employees
+                }
+              ])
+              .then(empChoice =>{
+                  const employee = empChoice.name;
+                  const params = [];
+                  params.push(employee);
+
+                  const roleQuery = `SELECT * FROM role`;
+                  connection.query(roleQuery, (err,data)=>{
+                    if(err){
+                        return reject(err);
+                    }
+                    const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+                    inquirer.prompt([
+                        {
+                          type: 'list',
+                          name: 'role',
+                          message: "What is the employee's new role?",
+                          choices: roles
+                        }
+                      ])
+                      .then(roleChoice =>{
+                          const role = roleChoice.role;
+                          params.push(role);
+
+                    let employee = params[0]
+                    params[0] = role
+                    params[1] = employee
+
+                    const sqlQuery = `UPDATE employee SET role_id = ? WHERE id = ?`;
+                    connection.query(sqlQuery, params, (err,results)=> {
+                        if(err){
+                            return reject(err);
+                        }
+                        console.log("Employee has been updated!");
+                        viewEmployees();
+                    });
+                });
+              });
+            });
+        });
+    });
+};
