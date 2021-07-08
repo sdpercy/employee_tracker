@@ -9,7 +9,12 @@ To view the database from MySQL run mssql -u root -p.
 
 ## Usage
 This applicaiton allows users to view, add update and delete employees, roles, department and managers.
-./images/demo.gif
+
+💻 Below is the gif showing the functionality of the application:
+  
+![Scott's Employee Tracker](./images/demo.gif)
+  
+🎥 The full movie file showing functionality of the application can be found [here](./images/demo.mp4)  
 
 ## Acceptance Criteria
 GIVEN a command-line application that accepts user input
