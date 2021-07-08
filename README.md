@@ -14,7 +14,7 @@ This applicaiton allows users to view, add update and delete employees, roles, d
   
 ![Scott's Employee Tracker](./images/demo.gif)
   
-🎥 The full movie file showing functionality of the application can be found [here](./images/demo.mp4)  
+🎥 The full movie file showing functionality of the application can be found [here](./images/dmo.mp4)  
 
 ## Acceptance Criteria
 GIVEN a command-line application that accepts user input
