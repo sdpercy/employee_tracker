@@ -9,6 +9,7 @@ To view the database from MySQL run mssql -u root -p.
 
 ## Usage
 This applicaiton allows users to view, add update and delete employees, roles, department and managers.
+./images/demo.gif
 
 ## Acceptance Criteria
 GIVEN a command-line application that accepts user input
